@@ -1,10 +1,10 @@
 require 'cinch'
-require './plugins/dice.rb'
+Dir["./plugins/*.rb"].each {|file| require file }
 
 bot = Cinch::Bot.new do
   configure do |c|
     c.server = "irc.quakenet.org"
-    c.channels = ["#awesomegang"]
+    c.channels = ["#gameservdebug"]
     c.nick = "GameServ|Debug"
     c.plugins.plugins = [
       Dice
