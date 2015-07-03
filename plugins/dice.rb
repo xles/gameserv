@@ -10,7 +10,8 @@ class Dice
   match /help roll$/, method: :help
   match /roll help$/, method: :help
   match /roll list$/, method: :list
-  match /roll add$/, method: :add
+  #match /roll add (\S+)\s+?:(\w+)\s+?:(\w+))/, method: :add
+  match /roll add (\S+)\s+(\w+)(?:\s+)?(?:"(.+)")?$/, method: :add
   match /roll (?:(\w+))$/, method: :saved
   match Regexp.new('roll ' + @@roll_re.to_s), method: :direct
 
@@ -18,8 +19,25 @@ class Dice
     m.reply 'Usage: !roll [[<repeats>#]<rolls>]d<sides>[<+/-><offset>]'
   end
 
-  def add(m)
-    m.reply "adding not yet implemented"
+  def add(m, dice_roll, name, description)
+    if !dice_roll.match @@roll_re
+      m.reply "Invalid dice roll."
+      return
+    end
+    
+    if !description
+      description = name
+    end
+    sth = $dbh.prepare('INSERT into "saved_rolls"
+      ("user", "description", "dice_roll", "name")
+      VALUES (?, ?, ?, ?)')
+    sth.bind_param 1, m.user.authname
+    sth.bind_param 2, description
+    sth.bind_param 3, dice_roll
+    sth.bind_param 4, name
+    sth.execute
+
+    m.reply '%s saved as "%s"' % [dice_roll, name]
   end
 
   def list(m)
