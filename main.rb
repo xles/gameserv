@@ -1,5 +1,10 @@
 require 'cinch'
+require 'dbi'
 Dir["./plugins/*.rb"].each {|file| require file }
+
+#$dbh = PG.connect( :dbname => 'lhl' )
+
+$dbh = DBI.connect('DBI:Pg:lhl')
 
 bot = Cinch::Bot.new do
   configure do |c|
