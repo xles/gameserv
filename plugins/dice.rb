@@ -4,14 +4,17 @@ class Dice
   include Cinch::Plugin
 
   @@roll_re = /(?:(?:(\d+)#)?(\d+))?d(\d+)(?:([+-])(\d+))?/i
-  @@cmds = ["help", "list", "add"]
+  @@cmds = ["help", "list", "add", "remove", "update"]
 
   match /roll$/, method: :help
   match /help roll$/, method: :help
   match /roll help$/, method: :help
   match /roll list$/, method: :list
   match /list rolls$/, method: :list
-  #match /roll add (\S+)\s+?:(\w+)\s+?:(\w+))/, method: :add
+  match /roll remove (\w+)(?:\s+)?$/, method: :destroy
+  match /remove roll (\w+)(?:\s+)?$/, method: :destroy
+  match /roll update (\w+)\s+(\S+)(?:\s+)?$/, method: :update
+  match /update roll (\w+)\s+(\S+)(?:\s+)?$/, method: :update
   match /roll add (\S+)\s+(\w+)(?:\s+)?(?:"(.+)")?$/, method: :add
   match /add roll (\S+)\s+(\w+)(?:\s+)?(?:"(.+)")?$/, method: :add
   match /roll (?:(\w+))$/, method: :saved
@@ -19,6 +22,10 @@ class Dice
 
   def help(m)
     m.reply 'Usage: !roll [[<repeats>#]<rolls>]d<sides>[<+/-><offset>]'
+    m.reply 'Usage: !roll add <dice roll> <name> ["<description>"]'
+    m.reply 'Usage: !roll update <name> <dice roll>'
+    m.reply 'Usage: !roll remove <name>'
+    m.reply 'Usage: !roll list'
   end
 
   def add(m, dice_roll, name, description)
@@ -39,7 +46,7 @@ class Dice
     sth.bind_param 4, name
     sth.execute
 
-    m.reply '%s saved as "%s"' % [dice_roll, name]
+    m.reply "%s saved as '%s'" % [dice_roll, name]
   end
 
   def list(m)
@@ -86,6 +93,61 @@ class Dice
       m.reply fmt % [row["name"], row["dice_roll"], row["description"]]
     end
     m.reply "%s" % "-" * tot_len
+  end
+
+  def update(m, name, dice_roll)
+    if !dice_roll.match @@roll_re
+      m.reply "Invalid dice roll."
+      return
+    end
+
+    sth = $dbh.prepare('SELECT COUNT(*) 
+      FROM "saved_rolls" 
+        WHERE "user" = ?
+        AND "name" = ?')
+    sth.bind_param 1, m.user.authname
+    sth.bind_param 2, name
+    sth.execute
+
+    if sth.fetch[0] < 1
+      m.reply "Unable to update: No such roll '%s'" % name
+      return
+    end
+
+    sth = $dbh.prepare('UPDATE "saved_rolls"
+        SET "dice_roll" = ?
+        WHERE "user" = ?
+        AND "name" = ?')
+    sth.bind_param 1, dice_roll
+    sth.bind_param 2, m.user.authname
+    sth.bind_param 3, name
+    sth.execute
+
+    m.reply '%s saved as "%s"' % [dice_roll, name]
+  end
+
+  def destroy(m, name)
+    sth = $dbh.prepare('SELECT COUNT(*) 
+      FROM "saved_rolls" 
+        WHERE "user" = ?
+        AND "name" = ?')
+    sth.bind_param 1, m.user.authname
+    sth.bind_param 2, name
+    sth.execute
+
+    if sth.fetch[0] < 1
+      m.reply "Unable to remove: No such roll '%s'" % name
+      return
+    end
+
+    sth = $dbh.prepare('DELETE FROM "saved_rolls"
+        WHERE "user" = ?
+        AND "name" = ?')
+    sth.bind_param 1, m.user.authname
+    sth.bind_param 2, name
+    sth.execute
+
+    m.reply "'%s' successfully removed." % [name]
   end
 
   def saved(m, roll_name)
