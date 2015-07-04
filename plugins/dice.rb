@@ -10,8 +10,10 @@ class Dice
   match /help roll$/, method: :help
   match /roll help$/, method: :help
   match /roll list$/, method: :list
+  match /list rolls$/, method: :list
   #match /roll add (\S+)\s+?:(\w+)\s+?:(\w+))/, method: :add
   match /roll add (\S+)\s+(\w+)(?:\s+)?(?:"(.+)")?$/, method: :add
+  match /add roll (\S+)\s+(\w+)(?:\s+)?(?:"(.+)")?$/, method: :add
   match /roll (?:(\w+))$/, method: :saved
   match Regexp.new('roll ' + @@roll_re.to_s), method: :direct
 
@@ -55,7 +57,9 @@ class Dice
       m.reply "Your saved rolls are:", true
     end
 
-    name_len = roll_len = desc_len = 0
+    name_len = 4
+    roll_len = 9
+    desc_len = 11
 
     rolls.each do |row|
       if row["name"].length > name_len 
@@ -64,16 +68,24 @@ class Dice
       if row["dice_roll"].length > roll_len 
         roll_len = row["dice_roll"].length
       end
-#      if row["description"].length > desc_len 
-#        desc_len = row["description"].length
-#      end
+      if row["description"].length > desc_len 
+        desc_len = row["description"].length
+      end
     end
 
+    tot_len = name_len + roll_len + desc_len + 6;
+
     fmt = "%-" + name_len.to_s + "s | %" + roll_len.to_s + "s | %s"
+    fmt2 = "%-" + name_len.to_s + "s|%" + roll_len.to_s + "s|%s"
+
+    m.reply fmt % ["name", "dice roll", "description"]
+    
+    m.reply fmt2 % ["-" * (name_len+1), "-" * (roll_len+2), "-" * (desc_len+1)]
 
     rolls.each do |row|
       m.reply fmt % [row["name"], row["dice_roll"], row["description"]]
     end
+    m.reply "%s" % "-" * tot_len
   end
 
   def saved(m, roll_name)
