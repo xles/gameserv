@@ -1,4 +1,4 @@
-require 'cinch'
+require "cinch"
 
 class Dice
   include Cinch::Plugin
@@ -6,18 +6,18 @@ class Dice
   @@roll_re = /(?:(?:(\d+)#)?(\d+))?d(\d+)(?:([+-])(\d+))?/i
   @@cmds = ["help", "list", "add", "remove", "update"]
 
-  match /roll$/, method: :help
-  match /help roll$/, method: :help
-  match /roll help$/, method: :help
-  match /roll list$/, method: :list
-  match /list rolls$/, method: :list
-  match /roll remove (\w+)(?:\s+)?$/, method: :destroy
-  match /remove roll (\w+)(?:\s+)?$/, method: :destroy
-  match /roll update (\w+)\s+(\S+)(?:\s+)?$/, method: :update
-  match /update roll (\w+)\s+(\S+)(?:\s+)?$/, method: :update
-  match /roll add (\S+)\s+(\w+)(?:\s+)?(?:"(.+)")?$/, method: :add
-  match /add roll (\S+)\s+(\w+)(?:\s+)?(?:"(.+)")?$/, method: :add
-  match /roll (?:(\w+))$/, method: :saved
+  match(/roll$/, method: :help)
+  match(/help roll$/, method: :help)
+  match(/roll help$/, method: :help)
+  match(/roll list$/, method: :list)
+  match(/list rolls$/, method: :list)
+  match(/roll remove (\w+)(?:\s+)?$/, method: :destroy)
+  match(/remove roll (\w+)(?:\s+)?$/, method: :destroy)
+  match(/roll update (\w+)\s+(\S+)(?:\s+)?$/, method: :update)
+  match(/update roll (\w+)\s+(\S+)(?:\s+)?$/, method: :update)
+  match(/roll add (\S+)\s+(\w+)(?:\s+)?(?:"(.+)")?$/, method: :add)
+  match(/add roll (\S+)\s+(\w+)(?:\s+)?(?:"(.+)")?$/, method: :add)
+  match(/roll (?:(\w+))$/, method: :saved)
   match Regexp.new('roll ' + @@roll_re.to_s), method: :direct
 
   def help(m)

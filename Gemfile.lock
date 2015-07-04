@@ -8,6 +8,7 @@ GEM
     dbi (0.4.5)
       deprecated (= 2.0.1)
     deprecated (2.0.1)
+    json (1.8.2)
     pg (0.18.2)
 
 PLATFORMS
@@ -17,6 +18,7 @@ DEPENDENCIES
   cinch
   dbd-pg
   dbi
+  json
 
 BUNDLED WITH
    1.10.5
