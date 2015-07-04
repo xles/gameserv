@@ -29,12 +29,12 @@ class Dice
   end
 
   def add(m, dice_roll, name, description)
-    if !dice_roll.match @@roll_re
+    unless dice_roll.match @@roll_re
       m.reply "Invalid dice roll."
       return
     end
     
-    if !description
+    unless description
       description = name
     end
     sth = $dbh.prepare('INSERT into "saved_rolls"
@@ -96,7 +96,7 @@ class Dice
   end
 
   def update(m, name, dice_roll)
-    if !dice_roll.match @@roll_re
+    unless dice_roll.match @@roll_re
       m.reply "Invalid dice roll."
       return
     end
