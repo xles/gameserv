@@ -11,7 +11,7 @@ bot = Cinch::Bot.new do
     c.nick = "GameServ|Debug"
     c.plugins.plugins = [
       Dice,
-      GameState
+      Campaign
     ]
   end
 
