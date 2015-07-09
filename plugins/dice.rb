@@ -59,9 +59,10 @@ class Dice
     rolls = sth.fetch_all
 
     if rolls.length == 0
-      m.reply "You don't have any saved rolls.", true
+      m.user.send "You don't have any saved rolls."
+      return
     else
-      m.reply "Your saved rolls are:", true
+      m.user.send "Your saved rolls are:"
     end
 
     name_len = 4
@@ -85,14 +86,14 @@ class Dice
     fmt = "%-" + name_len.to_s + "s | %" + roll_len.to_s + "s | %s"
     fmt2 = "%-" + name_len.to_s + "s|%" + roll_len.to_s + "s|%s"
 
-    m.reply fmt % ["name", "dice roll", "description"]
+    m.user.send fmt % ["name", "dice roll", "description"]
     
-    m.reply fmt2 % ["-" * (name_len+1), "-" * (roll_len+2), "-" * (desc_len+1)]
+    m.user.send fmt2 % ["-" * (name_len+1), "-" * (roll_len+2), "-" * (desc_len+1)]
 
     rolls.each do |row|
-      m.reply fmt % [row["name"], row["dice_roll"], row["description"]]
+      m.user.send fmt % [row["name"], row["dice_roll"], row["description"]]
     end
-    m.reply "%s" % "-" * tot_len
+    m.user.send "%s" % "-" * tot_len
   end
 
   def update(m, name, dice_roll)

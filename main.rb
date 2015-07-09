@@ -11,7 +11,8 @@ bot = Cinch::Bot.new do
     c.nick = "GameServ|Debug"
     c.plugins.plugins = [
       Dice,
-      Campaign
+      Campaign,
+      Logger
     ]
   end
 
@@ -19,5 +20,7 @@ bot = Cinch::Bot.new do
     m.reply "Hello, #{m.user.nick}"
   end
 end
+
+Wisper.subscribe(Logger.new(bot))
 
 bot.start
