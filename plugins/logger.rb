@@ -15,7 +15,7 @@ class Logger
     @time_format    = "%H:%M:%S"
     @message_format = "[%{time}] <%{nick}> %{msg}"
     @action_format  = "[%{time}] * %{nick} %{msg}"
-    @filename       = "%{campaign}_%{date}.log"
+    @filename       = "logs/%{campaign}_%{date}.log"
     @running        = {}
     @logfile        = {}
   end
