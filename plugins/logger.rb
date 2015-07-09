@@ -41,6 +41,7 @@ class Logger
       title,
       Time.now.utc.strftime("#{@date_format} #{@time_format}")
     ]
+    @logfile[channel].close
     @running[channel] = false
   end
  
@@ -49,9 +50,6 @@ class Logger
   end
  
   def cleanup
-    @logfile.each do |file|
-      file.close
-    end
     bot.debug("Closed message logfiles.")
   end
  
