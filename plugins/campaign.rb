@@ -10,7 +10,7 @@ class Campaign
 
   @@game_state = {}
 
-  match(/banana$/, method: :banana)
+  match(/topic\s(.*)$/, method: :banana)
   match(/campaign$/, method: :help)
   match(/campaign echo\s.*$/, method: :echo_message)
   match(/help campagin$/, method: :help)
@@ -28,15 +28,30 @@ class Campaign
     m.reply 'Usage: !roll list'
   end
 
+  def banana(m,str)
+    m.channel.topic = str
+  end
+
   def start_campaign(m)
     return unless m.target.instance_of? Cinch::Channel
     return unless @@game_state["title"]
     broadcast(:start_logger, m.channel.name, @@game_state["title"])
+    m.channel.moderated = true
+    m.channel.topic = 'Campaign "%s" in session, turn order: %s' % [
+      @@game_state["title"],
+      @@game_state["party"].join(", ")
+    ]
+    m.reply "Session is starting, players are now in character."
   end
 
   def stop_campaign(m)
     return unless m.target.instance_of? Cinch::Channel
     broadcast(:stop_logger, m.channel.name, @@game_state["title"])
+    m.channel.moderated = false
+    m.channel.topic = 'Campaign "%s" halted.' % [
+      @@game_state["title"]
+    ]
+    m.reply "Session halted."
   end
 
   def echo_message(m)
