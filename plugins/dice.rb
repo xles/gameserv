@@ -17,7 +17,7 @@ class Dice
   match(/update roll (\w+)\s+(\S+)(?:\s+)?$/, method: :update)
   match(/roll add (\S+)\s+(\w+)(?:\s+)?(?:"(.+)")?$/, method: :add)
   match(/add roll (\S+)\s+(\w+)(?:\s+)?(?:"(.+)")?$/, method: :add)
-  match(/roll (?:(\w+))$/, method: :saved)
+  match(/roll (\w+)(?:\s(.*))?$/, method: :saved)
   match Regexp.new('roll ' + @@roll_re.to_s), method: :direct
 
   def help(m)
@@ -151,9 +151,9 @@ class Dice
     m.reply "'%s' successfully removed." % [name]
   end
 
-  def saved(m, roll_name)
-    if roll_name.match @@roll_re then return end
-    if @@cmds.include? roll_name then return end
+  def saved(m, roll_name, offset)
+    return if roll_name.match @@roll_re
+    return if @@cmds.include? roll_name
     sth = $dbh.prepare('SELECT "description", "dice_roll" 
       FROM saved_rolls 
         WHERE "user" ILIKE ? 
@@ -168,10 +168,22 @@ class Dice
       m.reply "Unknown roll, use `!roll list` to see your saved rolls."
     else
       row = row[0]
-      fmt = '%s rolling "%s" ( %s ) = %d'
-      parts = row["dice_roll"].match @@roll_re
-      total = roll(parts[1], parts[2], parts[3], parts[4], parts[5])
-      m.reply fmt % [m.user.authname, row["description"], row["dice_roll"], total]
+      parts = row["dice_roll"].match Regexp.new(@@roll_re.to_s + '(?:\s(.*))?')
+      if offset
+        int_offset = (parts[5].to_i + offset.to_i)
+        fmt = '%{user} rolling "%{name}" ( %{roll} ) %{offset} = %{total}'
+      else
+        int_offset = parts[5]
+        fmt = '%{user} rolling "%{name}" ( %{roll} ) = %{total}'
+      end
+      total = roll(parts[1], parts[2], parts[3], parts[4], int_offset)
+      m.reply fmt % [
+        :user   => m.user.authname,
+        :name   => row["description"],
+        :roll   => row["dice_roll"],
+        :offset => offset,
+        :total  => total
+      ]
     end
     sth.finish
   end
